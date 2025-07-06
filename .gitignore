@@ -43,3 +43,18 @@ nb-configuration.xml
 /.quarkus/cli/plugins/
 # TLS Certificates
 .certs/
+
+# AWS SAM
+.aws-sam/
+samconfig.toml
+
+# Lambda deployment artifacts
+*.zip
+bootstrap
+
+# Temporary files
+/tmp/
+.tmp/
+
+# Old README backup
+README_OLD.md
