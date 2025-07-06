@@ -1,0 +1,104 @@
+
+###
+GET http://localhost:8050/api/v1/users
+
+###
+POST http://localhost:8050/api/v1/users
+Content-Type: application/json
+
+{
+  "firstName": "John",
+  "lastName": "Doe",
+  "email": "john.doe@email.com",
+  "password": "password"
+}
+
+
+###
+PUT http://localhost:8050/api/v1/users/1234
+Content-Type: application/json
+
+{
+  "firstName": "John",
+  "lastName": "Doe",
+  "email": "john.doe@email.com",
+  "password": "password"
+}
+
+###
+GET http://localhost:8080/api/v1/hello
+Content-Type: application/json
+
+{
+  "username": "user",
+  "password": "password1",
+  "role": "ADMIN"
+}
+
+###
+POST http://localhost:8080/api/v1/generate
+Content-Type: application/json
+
+{
+  "question": ""
+}
+
+<> 2024-12-25T162407.200.json
+<> 2024-12-25T161927.500.json
+
+###
+GET http://localhost:8080/api/v1/questions
+
+<> 2024-12-25T201824.200.json
+<> 2024-12-25T200555.200.json
+
+###
+GET http://localhost:8080/api/books
+
+<> 2025-07-04T234125.200.json
+<> 2025-07-04T230643.200.json
+<> 2025-07-04T230507.500.html
+
+###
+POST http://localhost:8080/api/books
+Content-Type: application/json
+
+{
+  "isbn": "978-0-618-00221-3",
+  "title": "The Hobbit",
+  "author": "J.R.R. Tolkien",
+  "publisher": "George Allen & Unwin",
+  "publicationYear": 1937,
+  "genre": "Fantasy",
+  "language": "English",
+  "description": "A fantasy novel and children's book by J.R.R. Tolkien."
+}
+
+<> 2025-07-05T202328.500.json
+<> 2025-07-05T202254.500.json
+<> 2025-07-05T202232.500.json
+<> 2025-07-05T201728.500.json
+<> 2025-07-05T201636.500.json
+<> 2025-07-05T201355.500.json
+<> 2025-07-05T201351.500.json
+<> 2025-07-05T201211.500.json
+<> 2025-07-05T201207.200.json
+<> 2025-07-05T201131.500.json
+<> 2025-07-05T200946.500.json
+<> 2025-07-05T200922.200.json
+<> 2025-07-04T234757.200.json
+<> 2025-07-04T234330.500.json
+<> 2025-07-04T234030.500.json
+
+###
+GET http://localhost:8080/api/books
+
+<> 2025-07-05T201221.200.json
+<> 2025-07-05T201155.200.json
+<> 2025-07-05T200941.200.json
+<> 2025-07-05T200928.200.json
+<> 2025-07-05T200911.200.json
+
+
+###
+DELETE http://localhost:8080/api/books/101

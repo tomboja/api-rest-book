@@ -16,7 +16,7 @@ public class BooksApplication {
     @Inject
     BookService bookService;
 
-    @GET
+    @POST
     @Path("/save")
     public List<Book> saveSampleBooks() {
         return bookService.saveSampleBooks();

@@ -96,6 +96,7 @@ public class BookService {
        }
        try {
            bookRepository.saveBook(book);
+           Book.getEntityManager().flush();
            log.info("Book saved successfully: {}", book);
            return book;
        } catch (ConstraintViolationException e) {
@@ -103,7 +104,7 @@ public class BookService {
        } catch (Exception e) {
            log.error("Error saving book: {}", e.getMessage());
            log.error(Arrays.toString(e.getStackTrace()));
-           throw e; // Let the generic exception mapper handle it
+           throw e;
        }
    }
 

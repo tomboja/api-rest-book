@@ -11,7 +11,7 @@ public class BookConstraintViolationExceptionMapper implements ExceptionMapper<B
         ErrorResponse errorResponse = new ErrorResponse(
                 exception.getMessage(),
                 Response.Status.BAD_REQUEST.getStatusCode(),
-                "Constraint"
+                "Book Resource Constraint Violation"
         );
         return Response.status(Response.Status.BAD_REQUEST)
                 .entity(errorResponse)
