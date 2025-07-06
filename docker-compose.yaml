@@ -1,0 +1,15 @@
+
+services:
+  db:
+    image: postgres:17.5-alpine
+    container_name: postgres-db
+    environment:
+      POSTGRES_USER: qrdbadmin
+      POSTGRES_PASSWORD: qradmin81
+      POSTGRES_DB: books
+    ports:
+      - "1551:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+volumes:
+  pgdata:
