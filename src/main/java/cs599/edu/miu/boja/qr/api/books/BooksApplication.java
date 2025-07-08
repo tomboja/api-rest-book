@@ -59,7 +59,7 @@ public class BooksApplication {
 
     @GET
     @Path("/health")
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.TEXT_PLAIN)
     public String health() {
         try (var connection = dataSource.getConnection()) {
             if (connection != null) {
