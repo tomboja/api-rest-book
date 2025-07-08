@@ -66,6 +66,16 @@
             <version>1.18.38</version>
         </dependency>
 
+        <!--  AWS deployment dependencies      -->
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-amazon-lambda-http</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-amazon-lambda</artifactId>
+        </dependency>
+
         <!--Test dependencies-->
         <dependency>
             <groupId>io.quarkus</groupId>
