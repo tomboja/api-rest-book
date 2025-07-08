@@ -1,20 +1,23 @@
 package cs599.edu.miu.boja.qr.api.books;
 
-import jakarta.inject.Inject;
-import jakarta.ws.rs.*;
-
-import java.util.List;
-
 import cs599.edu.miu.boja.qr.api.books.domain.Book;
 import cs599.edu.miu.boja.qr.api.books.service.BookService;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.sql.DataSource;
+import java.util.List;
 
 @Path("/api/books")
 public class BooksApplication {
     private static final Logger log = LoggerFactory.getLogger(BooksApplication.class);
     @Inject
     BookService bookService;
+    @Inject
+    DataSource dataSource;
 
     @POST
     @Path("/save")
@@ -54,4 +57,18 @@ public class BooksApplication {
         bookService.deleteBook(id);
     }
 
+    @GET
+    @Path("/health")
+    @Produces(MediaType.TEXT_PLAIN)
+    public String health() {
+        try (var connection = dataSource.getConnection()) {
+            if (connection != null) {
+                return "Database connection is successful!";
+            } else {
+                return "Failed to connect to the database.";
+            }
+        } catch (Exception e) {
+            return "Error connecting to the database: " + e.getMessage();
+        }
+    }
 }
