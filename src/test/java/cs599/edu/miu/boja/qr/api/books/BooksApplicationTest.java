@@ -22,7 +22,7 @@ class BooksApplicationTest {
 
     @Test
     void testAddBook() {
-        Book book = new Book("999-1-23-456789-0", "JUnit in Action", "Sam Brannen", "Manning", 2020, "Testing", "English", "JUnit 5 guide");
+        Book book = new Book(null,"999-1-23-456789-0", "JUnit in Action", "Sam Brannen", "Manning", "2020", "Testing", "English", "JUnit 5 guide");
         given()
                 .contentType(ContentType.JSON)
                 .body(book)
@@ -53,7 +53,7 @@ class BooksApplicationTest {
 
     @Test
     void testUpdateBook_NotFound() {
-        Book book = new Book("111-1-11-111111-1", "Nonexistent", "Nobody", "Nowhere", 2022, "None", "English", "Does not exist");
+        Book book = new Book(null, "111-1-11-111111-1", "Nonexistent", "Nobody", "Nowhere", "2022", "None", "English", "Does not exist");
         given()
                 .contentType(ContentType.JSON)
                 .body(book)

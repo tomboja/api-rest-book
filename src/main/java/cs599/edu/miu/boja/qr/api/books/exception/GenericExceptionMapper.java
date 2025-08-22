@@ -14,11 +14,13 @@ import jakarta.ws.rs.ext.Provider;
 public class GenericExceptionMapper implements ExceptionMapper<Exception> {
     @Override
     public Response toResponse(Exception exception) {
-        ErrorResponse errorResponse = new ErrorResponse(
-                "An unexpected error occurred",
-                Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),
-                exception.getClass().getSimpleName()
-        );
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .errorCode(exception.getMessage())
+                .message("An unexpected error occurred")
+                .status(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode())
+                .resource("Generic Exception")
+                .build();
+
         return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                 .entity(errorResponse)
                 .build();
