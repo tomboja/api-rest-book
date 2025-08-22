@@ -7,14 +7,14 @@ import jakarta.ws.rs.ext.Provider;
 @Provider
 public class ResourceNotFoundExceptionMapper implements ExceptionMapper<ResourceNotFoundException> {
     @Override
-    public Response toResponse(ResourceNotFoundException exception) {
-        ErrorResponse errorResponse = new ErrorResponse(
-                exception.getMessage(),
-                Response.Status.NOT_FOUND.getStatusCode(),
-                "Resource"
-        );
+    public Response toResponse(ResourceNotFoundException ex) {
+        ErrorResponse error = ErrorResponse.builder()
+                .message(ex.getMessage())
+                .status(Response.Status.NOT_FOUND.getStatusCode())
+                .errorCode(ex.getErrorCode())
+                .build();
         return Response.status(Response.Status.NOT_FOUND)
-                .entity(errorResponse)
+                .entity(error)
                 .build();
     }
 }

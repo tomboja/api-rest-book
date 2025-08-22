@@ -1,19 +1,24 @@
-package cs599.edu.miu.boja.qr.api.books;
+package cs599.edu.miu.boja.qr.api.books.controller;
 
 import cs599.edu.miu.boja.qr.api.books.domain.Book;
 import cs599.edu.miu.boja.qr.api.books.service.BookService;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import jakarta.ws.rs.core.Response;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.sql.DataSource;
+import java.net.URI;
 import java.util.List;
 
 @Path("/api/books")
+@Consumes(MediaType.APPLICATION_JSON)
+@Produces(MediaType.APPLICATION_JSON)
+@Slf4j
 public class BooksApplication {
-    private static final Logger log = LoggerFactory.getLogger(BooksApplication.class);
+
     @Inject
     BookService bookService;
     @Inject
@@ -21,19 +26,30 @@ public class BooksApplication {
 
     @POST
     @Path("/save")
-    public List<Book> saveSampleBooks() {
-        return bookService.saveSampleBooks();
+    public Response saveSampleBooks() {
+        List<Book> books = bookService.seedBooks();
+        return Response.status(Response.Status.CREATED)
+                .entity(books)
+                .build();
     }
 
     @GET
-    public List<Book> getAllBooks() {
-        return bookService.getAllBooks();
+    public Response getAllBooks() {
+        List<Book> books = bookService.getAllBooks();
+        return Response.status(Response.Status.OK)
+                .entity(books)
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
+                .build();
     }
 
     @POST
-    public Book addBook(Book book) {
-        log.info("Adding book: " + book);
-        return bookService.addBook(book);
+    public Response addBook(Book book) {
+        Book savedBook = bookService.addBook(book);
+        URI location = URI.create("/api/books/" + savedBook.getId());
+        return Response.created(location)
+                .entity(savedBook)
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
+                .build();
     }
 
     @GET

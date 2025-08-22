@@ -1,18 +1,22 @@
 package cs599.edu.miu.boja.qr.api.books.service;
 
 import cs599.edu.miu.boja.qr.api.books.domain.Book;
-import cs599.edu.miu.boja.qr.api.books.exception.BookConstraintViolationException;
+import cs599.edu.miu.boja.qr.api.books.domain.entity.BookEntity;
+import cs599.edu.miu.boja.qr.api.books.exception.DuplicateResourceException;
 import cs599.edu.miu.boja.qr.api.books.exception.ResourceNotFoundException;
+import cs599.edu.miu.boja.qr.api.books.mapper.BookMapper;
 import cs599.edu.miu.boja.qr.api.books.repository.BooksRepository;
+import cs599.edu.miu.boja.qr.api.books.util.BookEntityDataSeedUtil;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
-import org.hibernate.exception.ConstraintViolationException;
+import jakarta.validation.Valid;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @ProjectName: api-rest-book
@@ -29,83 +33,107 @@ public class BookService {
     @Inject
     BooksRepository bookRepository;
 
-    public List<Book> saveSampleBooks() {
-        return bookRepository.saveAllBooks();
+    public Book findBookById(Long id) {
+        return bookRepository.findBookById(id)
+                .map(BookMapper::mapBookEntity)
+                .orElseThrow(() -> new ResourceNotFoundException("Book not found with id: " + id));
     }
-
-   public Book findBookById(Long id) {
-       Book book = bookRepository.findBookById(id);
-       if (book == null) {
-           throw new ResourceNotFoundException("Book not found with id: " + id);
-       }
-       return book;
-   }
 
     // Example method to update a book
     @Transactional
     public Book updateBook(Long id, Book book) {
         // find the book by id
-        Book existingBook = bookRepository.findBookById(id);
-        if (existingBook == null) {
-            throw new ResourceNotFoundException("Book not found with id: " + id);
+        BookEntity bookEntity = bookRepository.findBookById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Book not found with id: " + id));
+
+        // Update the existing book entity with new values
+        if (StringUtils.isNotBlank(book.getTitle())) {
+            bookEntity.setTitle(book.getTitle());
         }
-        // Update the existing book with new values
-        existingBook.setTitle(book.getTitle());
-        existingBook.setAuthor(book.getAuthor());
-        existingBook.setPublisher(book.getPublisher());
-        existingBook.setPublicationYear(book.getPublicationYear());
-        existingBook.setGenre(book.getGenre());
-        existingBook.setLanguage(book.getLanguage());
-        existingBook.setDescription(book.getDescription());
+        if (StringUtils.isNotBlank(book.getAuthor())) {
+            bookEntity.setAuthor(book.getAuthor());
+        }
+        if (StringUtils.isNotBlank(book.getPublicationYear())) {
+            bookEntity.setPublicationYear(book.getPublicationYear());
+        }
+        if (StringUtils.isNotBlank(book.getGenre())) {
+            bookEntity.setGenre(book.getGenre());
+        }
+        if (StringUtils.isNotBlank(book.getDescription())) {
+            bookEntity.setDescription(book.getDescription());
+        }
+
         // Save the updated book
-        bookRepository.saveBook(existingBook);
-        log.info("Book updated successfully: {}", existingBook);
-        return existingBook;
+        bookRepository.saveBook(bookEntity);
+        log.info("Book updated successfully: {}", bookEntity);
+        return BookMapper.mapBookEntity(bookEntity);
     }
 
     @Transactional
     public boolean deleteBook(Long id) {
         // This method should delete a book by its ID
-        Book book = bookRepository.findBookById(id);
-        if (book == null) {
-            log.error("Book not found with id: {}", id);
-            throw new ResourceNotFoundException("Book not found with id: " + id);
-        }
-        try {
-            bookRepository.deleteBook(book);
-            log.info("Book deleted successfully: {}", book);
-            return true;
-        } catch (Exception e) {
-            log.error("Error deleting book: {}", e.getMessage());
-            log.error(Arrays.toString(e.getStackTrace()));
-        }
+        Book book = bookRepository.findBookById(id)
+                .map(BookMapper::mapBookEntity)
+                .orElseThrow(() -> {
+                    log.error("Book not found with id: {}", id);
+                    return new ResourceNotFoundException("Book not found with id: " + id);
+                });
 
-        return false;
+       try {
+           boolean deleted = bookRepository.deleteBook(id);
+           if (deleted) {
+               log.info("Book deleted successfully: {}", book);
+           } else {
+               log.error("Book not found for deletion: {}", id);
+           }
+           return deleted;
+       } catch (Exception exception) {
+           log.error("Error deleting book: ", exception);
+           return false;
+       }
     }
 
     // Example method to retrieve all books
     public List<Book> getAllBooks() {
-        return bookRepository.findAllBooks();
+        return bookRepository.findAllBooks()
+                .stream().map(BookMapper::mapBookEntity)
+                .collect(Collectors.toList());
     }
 
-   @Transactional
-   public Book addBook(Book book) {
-       if (book == null) {
-           log.error("Book cannot be null");
-           throw new IllegalArgumentException("Book cannot be null");
-       }
-       try {
-           bookRepository.saveBook(book);
-           Book.getEntityManager().flush();
-           log.info("Book saved successfully: {}", book);
-           return book;
-       } catch (ConstraintViolationException e) {
-           throw new BookConstraintViolationException("Constraint violation: " + e.getMessage(), e);
-       } catch (Exception e) {
-           log.error("Error saving book: {}", e.getMessage());
-           log.error(Arrays.toString(e.getStackTrace()));
-           throw e;
-       }
-   }
+    @Transactional
+    public Book addBook(@Valid Book book) {
 
+        // Check for duplicate by title, author, and publication year
+        if (bookRepository.findBookByTitleAuthorYearOfPublication(
+                book.getTitle(), book.getAuthor(), book.getPublicationYear()).isPresent()) {
+            log.error("Duplicate book detected: title={}, author={}, year={}",
+                    book.getTitle(), book.getAuthor(), book.getPublicationYear());
+            throw new DuplicateResourceException("Book with same title, author, and publication year already exists");
+        }
+
+        BookEntity bookEntity = BookMapper.mapBook(book);
+        BookEntity persistedBookEntity = bookRepository.saveBook(bookEntity);
+        if (persistedBookEntity == null) {
+            log.error("Failed to save book: {}", book);
+            throw new RuntimeException("Failed to save book");
+        }
+        log.info("Book added successfully: {}", persistedBookEntity);
+        return BookMapper.mapBookEntity(persistedBookEntity);
+    }
+
+    @Transactional
+    public List<Book> seedBooks() {
+        List<BookEntity> bookEntities = BookEntityDataSeedUtil.seedBookEntities();
+        List<BookEntity> bookEntity = bookRepository.saveAllBooks(bookEntities);
+        if (bookEntity == null || bookEntity.isEmpty()) {
+            log.error("No books were saved during seeding.");
+            throw new RuntimeException("No books were saved during seeding.");
+        }
+        log.info("Books seeded successfully: {}", bookEntity);
+
+
+        return bookEntities.stream()
+                .map(BookMapper::mapBookEntity)
+                .toList();
+    }
 }
